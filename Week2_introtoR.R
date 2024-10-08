@@ -43,3 +43,6 @@ elephant1_lb <- elephant1_kg *2.2
 elephant2_lb > elephant1_lb
 myelephants <- (c(elephant1_lb, elephant2_lb))
 which(myelephants == max(myelephants))
+
+#test edit
+#test edit 2
