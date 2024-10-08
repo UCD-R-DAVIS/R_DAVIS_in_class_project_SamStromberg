@@ -11,3 +11,5 @@ times3 <- prob1 * 3
 plus10 <- times3 + 10
 plus10
 plus10[c(TRUE,FALSE)]
+final <- plus10[c(TRUE, FALSE)]
+final
