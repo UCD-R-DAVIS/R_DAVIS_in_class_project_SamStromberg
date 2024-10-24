@@ -432,33 +432,135 @@ surveys %>%
 
 #Try out a new function, count(). Group the data by sex and pipe the grouped data into the count() function. How could you get the same result using group_by() and summarize()? Hint: see ?n.
 
-#HOMEWORKS----
-##HW2----
-set.seed(15)
-hw2 <- runif(50, 4, 50)
-hw2 <- replace(hw2, c(4,12,22,27), NA)
-hw2
 
-hw2 <- na.omit(hw2)
-# or hw2[!is.na(hw2)]
+# Conditional statements ---- 
+## ifelse: run a test, if true do this, if false do this other thing
+## case_when: basically multiple ifelse statements
+# can be helpful to write "psuedo-code" first which basically is writing out what steps you want to take & then do the actual coding
+# great way to classify and reclassify data
 
-# mean(hw2, na.rm = TRUE)
-# Use na.rm to use a function when dataset includes na's
+## Load library and data ----
+library(tidyverse)
+surveys <- read_csv("data/portal_data_joined.csv")
 
-prob1 <- hw2[hw2>=14&hw2<=38]
-#or prob1 <- hw2[!is.na(hw2) & hw2>=14 & hw2<=38]
-# probably better because it leaves hw2 unedited
+## ifelse() ----
+# from base R
+# ifelse(test, what to do if yes/true, what to do if no/false)
+## if yes or no are too short, their elements are recycled
+## missing values in test give missing values in the result
+## ifelse() strips attributes: this is important when working with Dates and factors
+surveys$hindfoot_cat <- ifelse(surveys$hindfoot_length < mean(surveys$hindfoot_length, na.rm = TRUE), yes = "small", no = "big")
 
-prob1 * 3
-times3 <- prob1 * 3
-plus10 <- times3 + 10
-plus10
-plus10[c(TRUE,FALSE)]
-final <- plus10[c(TRUE, FALSE)]
-final
+head(surveys$hindfoot_cat)
+head(surveys$hindfoot_length)
+summary(surveys$hindfoot_length)
+surveys %>% summarize(mean(hindfoot_length, na.rm = TRUE))
+unique(surveys$hindfoot_cat)
 
-# TEST: cbind(hw2, plus10, hw2 + hw2)
-# cbind creates a matrix thing to look at the above objects next to eachother
+surveys %>%
+  mutate(hindfoot_cat = case_when(
+    hindfoot_length > 29.29 ~ "big", 
+    TRUE ~ "small"
+  )) %>%
+  select(hindfoot_length, hindfoot_cat) %>%
+  head()
+
+## case_when() ----
+# GREAT helpfile with examples!
+# from tidyverse so have to use within mutate()
+# useful if you have multiple tests
+## each case evaluated sequentially & first match determines corresponding value in the output vector
+## if no cases match then values go into the "else" category
+
+# case_when() equivalent of what we wrote in the ifelse function
+surveys %>%
+  mutate(hindfoot_cat = case_when(
+    hindfoot_length > 29.29 ~ "big", 
+    TRUE ~ "small"
+  )) %>%
+  select(hindfoot_length, hindfoot_cat) %>%
+  head()
+
+#to use mean(), use na.rm 
+
+surveys %>%
+  mutate(hindfoot_cat = case_when(
+    hindfoot_length > mean(hindfoot_length, na.rm = TRUE) ~ "big", 
+    TRUE ~ "small"
+  )) %>%
+  select(hindfoot_length, hindfoot_cat) %>%
+  head()
+
+table(surveys$hindfoot_cat)
+
+#You can use | as or function still
+
+surveys %>% 
+  mutate(hindfoot_cat = case_when(
+    hindfoot_length > 31.5 ~ "big",
+    hindfoot_length > 29 ~ "medium",
+    is.na(hindfoot_length) ~ NA_character_,
+    TRUE ~ "small"
+  )) %>% 
+  select(hindfoot_length, hindfoot_cat) %>% 
+  head(10)
+#NA_character_ is different than NA
+
+# but there is one BIG difference - what is it?? (hint: NAs)
+
+
+
+# if no "else" category specified, then the output will be NA
+
+
+# lots of other ways to specify cases in case_when and ifelse
+surveys %>%
+  mutate(favorites = case_when(
+    year < 1990 & hindfoot_length > 29.29 ~ "number1", 
+    species_id %in% c("NL", "DM", "PF", "PE") ~ "number2",
+    month == 4 ~ "number3",
+    TRUE ~ "other"
+  )) %>%
+  group_by(favorites) %>%
+  tally()
+
+#Joins and pivots----
+
+#joins tend to work row wise, merge is columns i think...
+#inner_join is only if there's matches on both dataframes
+#left_join and right_join use 1st or 2nd dataframe (x or y frames)
+#so left join keeps everything in the first frame no matter what
+#full join smashes it all, keeps everything and fills in na's with no corresponding values
+#specify which columns to join on (otherwise it just joins on everything which matches i think...)
+#dim() funtion is great! idk what dim does, or also nrow() calls
+dim(surveys)
+
+library(tidyverse)
+
+tail <- read_csv("data/tail_length.csv")
+surveys <- read_csv("data/portal_data_joined.csv")
+
+dim(tail)
+dim(surveys)
+head(tail)
+
+surveys_inner <- inner_join(x = surveys, y = tail)
+
+surveys_left <- left_join(x = surveys, y = tail)
+
+all(surveys$record_id %in% tail$record_id)
+
+tail <- tail %>% mutate(tail_length2 = tail_length)
+
+
+surveys_mz <- surveys %>% 
+  filter(!is.na(weight)) %>% 
+  group_by(genus, plot_id) %>% 
+  summarize(mean_weight = mean(weight)) 
+
+surveys_mz
+
+surveys_mz %>% pivot_wider(id_cols = 'genus', names_from = 'plot_id', values_from = 'mean_weight')
 
 
 
