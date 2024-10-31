@@ -22,7 +22,9 @@ surveys_ifcat <- surveys
 
 surveys_ifcat$weight_cat <- "Large"
 
-surveys_ifcat %>% filter(weight < 48) %>% ifelse(surveys_ifcat$weight >=20, yes = "medium", no = "small")
+surveys_ifcat$weight_cat <- ifelse(surveys_ifcat$weight >=20, yes = "medium", no = "small")
+
+surveys_ifcat$weight_cat %>%  ifelse(surveys)
 
 #surveys_ifcat$weight_cat <- filter(surveys_ifcat$weight != "Large") %>%  ifelse(surveys_ifcat$weight < 48 & surveys_ifcat$weight >=20, yes = "medium", no = "small")
 
