@@ -637,6 +637,63 @@ ggplot(data = surveys_wt_cat, aes(x = weight_cat, y = hindfoot_length)) + geom_j
 
 class(surveys_wt_cat$weight_cat)
 
+library(tidyverse)
+
+surveys_complete <- read_csv('data/portal_data_joined.csv') %>%
+  filter(complete.cases(.))
+
+# these are two different ways of doing the same thing
+head(surveys_complete %>% count(year,species_id))
+head(surveys_complete %>% group_by(year,species_id) %>% tally())
+
+yearly_counts <- surveys_complete %>% count(year,species_id)
+
+head(yearly_counts)
+
+ggplot(data = yearly_counts, mapping = aes(x = year, y = n, group = species_id)) + geom_line(aes(colour = species_id)) 
+
+ggplot(data = yearly_counts[yearly_counts$species_id%in%c("BA", "DM", "DS"),], mapping = aes(x = year, y = n, group = species_id)) + 
+  geom_line() +
+  facet_wrap(~species_id,scales = 'free_y', ncol = 1) #the ~ is for calling a function or something...
+
+#the bracketing above is how you would index for just specific species_id's
+
+#not sure what scales does
+
+#nrow or ncol stacks or puts them in rows 
+
+ggplot(data = yearly_counts, mapping = aes(x = year, y = n, group = species_id)) + 
+  geom_line() +
+  facet_wrap(~species_id) +
+  scale_y_continuous(name = 'obs', breaks = seq(0,600,100)) +
+  theme_bw()
+
+ggplot(data = yearly_counts,mapping = aes(x = year, y = n)) +
+  geom_point()
+
+ggplot(data = yearly_counts,mapping = aes(x = year, y= n)) +
+  geom_line()
+
+ggplot(data = yearly_counts,mapping = aes(x = year, y= n,group = species_id)) +
+  geom_line()
+
+
+ggplot(data = yearly_counts,mapping = aes(x = year, y= n, colour = species_id)) +
+  geom_line()
+
+
+ggplot(data = yearly_counts, mapping = aes(x = year, y = n)) +
+  geom_line() +
+  facet_wrap(~ species_id)
+
+
+ggplot(data = yearly_counts, mapping = aes(x = year, y = n)) +
+  geom_line() +
+  facet_wrap(~ species_id,scales = 'free')
+
+
+
+
 
 
 
