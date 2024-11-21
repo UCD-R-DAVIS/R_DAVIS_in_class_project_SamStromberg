@@ -1,4 +1,5 @@
 library(tidyverse)
+library(lubridate)
 
 mloa <- read_csv("https://raw.githubusercontent.com/gge-ucd/R-DAVIS/master/data/mauna_loa_met_2001_minute.csv", col_types = "")
 
@@ -13,6 +14,8 @@ mloa <- mloa %>% mutate(day = as.character(day), month = as.character(month), ho
 
 
 mloa <- mloa %>% filter(rel_humid != -99, temp_C_2m != -999.9, windSpeed_m_s != -999.9) #removing NAs
+
+# mloa <- mloa %>% mutate(datetime = ymd_hm(paste(paste(year,month,day,sep = "-"),paste(hour24,min,sep = ":")))) also works!
 
 mloa$datetime <- paste(mloa$year, "-", mloa$month,
                                 "-", mloa$day, ", ", mloa$hour24, ":",
