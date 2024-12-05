@@ -1,37 +1,78 @@
 library(tidyverse)
-library(lubridate)
+library(dplyr)
+surveys <- read.csv("data/portal_data_joined.csv")
 
-mloa <- read_csv("https://raw.githubusercontent.com/gge-ucd/R-DAVIS/master/data/mauna_loa_met_2001_minute.csv", col_types = "")
+#1
 
-unique(mloa$hour24)
-unique(mloa$min)
-unique(mloa$month)
-
-mloa %>% count(rel_humid == -99 & temp_C_2m == -999.9)
-mloa %>% count(windSpeed_m_s == -999.9)
-
-mloa <- mloa %>% mutate(day = as.character(day), month = as.character(month), hour24 = as.character(hour24), min = as.character(min), year = as.character(year)) # preparing for lubridate
-
-
-mloa <- mloa %>% filter(rel_humid != -99, temp_C_2m != -999.9, windSpeed_m_s != -999.9) #removing NAs
-
-# mloa <- mloa %>% mutate(datetime = ymd_hm(paste(paste(year,month,day,sep = "-"),paste(hour24,min,sep = ":")))) also works!
-
-mloa$datetime <- paste(mloa$year, "-", mloa$month,
-                                "-", mloa$day, ", ", mloa$hour24, ":",
-                                mloa$min, sep = "")
-
-mloa$datetime <- ymd_hm(as.character(mloa$datetime)) #to lubridate
-
-mloa$datetimeLocal <- with_tz(mloa$datetime, tzone = "Pacific/Honolulu")
-
-tz(mloa$datetimeLocal)
-
-mloa1 <- mloa %>% mutate(HImonth = month(datetimeLocal), HIhour = hour(datetimeLocal))
+##TRICKY i got got
+  for(i in unique(surveys$taxa)){
+    print(i)
+    mytaxon <- surveys[surveys$taxa == i,]  # why surveys[surveys$taxa]...
+    longestnames <- mytaxon[nchar(mytaxon$species) == max(nchar(mytaxon$species)),] %>% select(species)
+    print(paste0("The longest species name(s) among ", i, "s is/are: "))
+    print(unique(longestnames$species))
+  }
 
 
-mloahrtemp <- mloa1 %>% group_by(HImonth, HIhour) %>% summarize(meantemp = mean(temp_C_2m))
 
-mloahrtemp %>% count(HImonth)
+#2
+mloa <- read_csv("https://raw.githubusercontent.com/ucd-cepb/R-DAVIS/master/data/mauna_loa_met_2001_minute.csv")
 
-ggplot(mloahrtemp, aes(x = HImonth, y = meantemp, color = HIhour)) + geom_point() + scale_color_viridis_c() + theme_light() + xlab("Month") + ylab("Avg Temp in C") + scale_x_continuous(breaks = 1:12)
+
+map(mloa, max)
+
+
+mloa %>% mutate(temp_F_towertop = (temp_C_towertop*1.8 + 32))
+
+mloa$temp_C_towertop*1.8 + 32
+
+C_to_F <- function(x){
+  x*1.8 + 32 
+}
+
+mloaF <- mloa
+mloaF <- mloaF %>% mutate(temp_F_towertop = C_to_F(mloa$temp_C_towertop))
+mloaF <- mloaF %>% mutate(temp_F_10m = C_to_F(mloa$temp_C_10m))
+mloaF <- mloaF %>% mutate(temp_F_2m = C_to_F(mloa$temp_C_2m))
+
+
+
+
+
+head(mloa_test)
+
+summary(mloa$baro_hPa)
+unique(mloa$baro_hPa)
+
+#Messing around
+for(i in unique(surveys$taxa)){
+  print(i)
+  #mytaxon <- surveys$taxa == i  # why surveys[surveys$taxa]...
+  #longestnames <- mytaxon[nchar(mytaxon$species) == max(nchar(mytaxon$species)),] %>% select(species)
+  #print(paste0("The longest species name(s) among ", i, "s is/are: "))
+  #print(unique(longestnames$species))
+}
+
+
+
+#Aborted Attempts/Testing
+
+for(i in unique(surveys$taxa{
+  taxa <- nchar(unique(i))
+  print(i)
+}
+
+
+nchar(unique(surveys$species))
+
+unique(surveys$taxa)
+
+surveys %>% group_by(taxa) %>% nchar(unique(surveys$species)) 
+
+
+surveys[surveys$taxa == "Rodent",]
+
+surveys %>% group_by(taxa) %>% filter(taxa == "Reptile") %>% count()
+
+surveys$taxa == 1
+
